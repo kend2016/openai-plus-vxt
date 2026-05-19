@@ -241,25 +241,26 @@ async function fetchSmsRelay(url: string): Promise<SmsRelayFetchResponse> {
   }
 
   const status = response.status;
-  const detail = await readSmsRelayResponse(response);
+  const { parsed: detail, text } = await readSmsRelayResponse(response);
   if (!response.ok) {
     return {
       ok: false,
       status,
-      message: `接码 API 返回 ${status}：${typeof detail === 'string' ? detail : response.statusText}`,
+      message: `接码 API 返回 ${status}：${text || response.statusText}`,
+      text,
       raw: detail,
     };
   }
 
   if (isRecord(detail)) {
-    const code = Number(detail.code || 0);
     const data = String(detail.data || '').trim();
     const message = String(detail.msg || detail.message || 'OK');
     return {
-      ok: code === 200 || code === 0,
+      ok: isSmsRelaySuccessPayload(detail),
       status,
       message,
       data,
+      text,
       raw: detail,
     };
   }
@@ -269,19 +270,20 @@ async function fetchSmsRelay(url: string): Promise<SmsRelayFetchResponse> {
     status,
     message: 'OK',
     data: String(detail || '').trim(),
+    text,
     raw: detail,
   };
 }
 
-async function readSmsRelayResponse(response: Response): Promise<unknown> {
+async function readSmsRelayResponse(response: Response): Promise<{ parsed: unknown; text: string }> {
   const text = await response.text();
   if (!text) {
-    return '';
+    return { parsed: '', text: '' };
   }
   try {
-    return JSON.parse(text);
+    return { parsed: JSON.parse(text), text };
   } catch {
-    return text;
+    return { parsed: text, text };
   }
 }
 
@@ -304,6 +306,26 @@ function delay(ms: number): Promise<void> {
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return Boolean(value && typeof value === 'object');
+}
+
+function isSmsRelaySuccessPayload(value: Record<string, unknown>): boolean {
+  if (typeof value.success === 'boolean') {
+    return value.success;
+  }
+  if (typeof value.ok === 'boolean') {
+    return value.ok;
+  }
+
+  const codeValue = value.code ?? value.status ?? value.statusCode;
+  if (codeValue === undefined || codeValue === null || codeValue === '') {
+    return true;
+  }
+
+  const code = Number(codeValue);
+  if (Number.isNaN(code)) {
+    return true;
+  }
+  return code === 0 || code === 1 || code === 200;
 }
 
 interface OutlookFetchPayload {

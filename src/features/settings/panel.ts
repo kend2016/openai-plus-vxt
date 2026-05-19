@@ -1,5 +1,7 @@
 import { loadAddressAutofillSettings, saveAddressAutofillSettings } from './state';
 
+const TG_GROUP_URL = 'https://t.me/fuck_open';
+
 export interface SettingsDialogHandle {
   element: HTMLElement;
   open(): void;
@@ -48,6 +50,11 @@ export function createSettingsDialog(): SettingsDialogHandle {
     'PayPal 注册页自动填写',
     '用于 paypal.com/checkoutweb/signup 页面，填写国家、邮箱、卡资料、姓名、地址和密码提示。',
   );
+  const tgGroupButton = document.createElement('button');
+  tgGroupButton.className = 'opx-external-link-button';
+  tgGroupButton.type = 'button';
+  tgGroupButton.textContent = 'TG 群组：t.me/fuck_open';
+  tgGroupButton.title = '打开 TG 群组';
 
   const hint = document.createElement('div');
   hint.className = 'opx-hint';
@@ -56,7 +63,7 @@ export function createSettingsDialog(): SettingsDialogHandle {
   const status = document.createElement('div');
   status.className = 'opx-status';
 
-  dialog.append(header, payOpenAiItem, payPalSignupItem, hint, status);
+  dialog.append(header, payOpenAiItem, payPalSignupItem, tgGroupButton, hint, status);
   overlay.append(dialog);
 
   closeButton.addEventListener('click', close);
@@ -73,6 +80,9 @@ export function createSettingsDialog(): SettingsDialogHandle {
   payPalSignupCheckbox.addEventListener('change', async () => {
     await saveAddressAutofillSettings({ payPalSignupEnabled: payPalSignupCheckbox.checked });
     setStatus(status, '设置已保存', 'ok');
+  });
+  tgGroupButton.addEventListener('click', () => {
+    window.open(TG_GROUP_URL, '_blank', 'noopener,noreferrer');
   });
 
   const update = async () => {
