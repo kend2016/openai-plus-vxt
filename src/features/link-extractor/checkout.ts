@@ -330,23 +330,39 @@ function stringValue(value: unknown): string {
 }
 
 function extractResponseError(data: unknown, text: string): string {
+  let message = '';
   if (isRecord(data)) {
     if (typeof data.detail === 'string') {
-      return shorten(data.detail);
+      message = shorten(data.detail);
     }
     if (typeof data.error === 'string') {
-      return shorten(data.error);
+      message = shorten(data.error);
     }
     if (isRecord(data.error)) {
       if (typeof data.error.detail === 'string') {
-        return shorten(data.error.detail);
+        message = shorten(data.error.detail);
       }
       if (typeof data.error.message === 'string') {
-        return shorten(data.error.message);
+        message = shorten(data.error.message);
       }
     }
   }
-  return shorten(text || '请求失败');
+  if (!message) {
+    message = shorten(text || '请求失败');
+  }
+  return explainStripeCurrencyError(message);
+}
+
+function explainStripeCurrencyError(message: string): string {
+  if (!/cannot combine currencies on a single customer/i.test(message)) {
+    return message;
+  }
+
+  return [
+    'Stripe 限制：同一 customer 不能混用不同币种。',
+    '这个账号当前已有 USD 订阅/会话，切到日本会请求 JPY，因此被 Stripe 拒绝。',
+    '请改用没有现有订阅的账号，或者切回美国区域后再生成。',
+  ].join(' ');
 }
 
 function fail(message: string): CheckoutLinkResponse {
