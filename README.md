@@ -32,8 +32,30 @@ TG 群组：[https://t.me/fuck_open](https://t.me/fuck_open)
 - 插件面板
   - 右侧浮动面板，支持收起/展开。
   - 收起状态、当前 tab、输入内容和设置会保存在本地。
-  - 设置页显示当前插件版本号，便于后续更新检查。
+  - 设置页显示当前插件版本号，支持手动检测 GitHub Release 更新。
   - 设置页提供 TG 群组入口：[https://t.me/fuck_open](https://t.me/fuck_open)。
+
+## 截图
+
+### 注册辅助
+
+![注册辅助](image/reg.png)
+
+### 提链接
+
+![提链接](image/link.png)
+
+### 地址资料
+
+![地址资料](image/address.png)
+
+### 接码
+
+![接码](image/sms.png)
+
+### 设置
+
+![设置](image/settings.png)
 
 ## 开发环境
 
@@ -119,6 +141,7 @@ email----password----client_id----refresh_token
 - ChatGPT / OpenAI Auth / OpenAI Pay
 - PayPal
 - meiguodizhi 地址资料站点
+- GitHub Releases API：用于版本更新检查
 
 ## 发布版本
 
@@ -137,7 +160,7 @@ pnpm zip
 4. 上传 `.output` 中生成的 zip 文件。
 5. 在 Release notes 写更新说明。
 
-后续插件可以接入 GitHub Releases API，检测最新版本并在插件顶部显示更新提示、下载地址和更新说明。
+插件会通过 GitHub Releases API 检测最新正式版。如果最新版本高于当前插件版本，会在插件顶部显示更新提示、下载地址和更新说明。设置页也提供“检测更新”按钮，可手动强制刷新版本检查。
 
 ## 项目结构
 
@@ -151,6 +174,7 @@ src/
     register/            注册辅助
     link-extractor/      Checkout 链接提取
     address-autofill/    地址资料和支付页自动填写
+    version-check/       GitHub Release 版本检查和更新提示
     sms/                 接码链接轮询和验证码历史
     settings/            设置页和持久化设置
 scripts/                 本地调试脚本

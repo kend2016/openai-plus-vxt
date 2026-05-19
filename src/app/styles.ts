@@ -143,6 +143,64 @@ export const PANEL_STYLES = `
   line-height: 16px;
 }
 
+.opx-version-notice {
+  display: grid;
+  gap: 7px;
+  margin: 0 0 8px;
+  padding: 8px;
+  border: 1px solid rgba(47, 209, 124, 0.42);
+  border-radius: 7px;
+  background: rgba(47, 209, 124, 0.1);
+  color: #dcfce7;
+}
+
+.opx-version-notice[hidden] {
+  display: none;
+}
+
+.opx-version-notice-title {
+  color: #bbf7d0;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 16px;
+}
+
+.opx-version-notice-body {
+  color: #cbd5e1;
+  font-size: 11px;
+  line-height: 15px;
+  overflow-wrap: anywhere;
+}
+
+.opx-version-notice-actions {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 54px;
+  gap: 5px;
+}
+
+.opx-mini-button {
+  box-sizing: border-box;
+  min-width: 0;
+  height: 28px;
+  border: 0;
+  border-radius: 6px;
+  background: #2fd17c;
+  color: #04130a;
+  cursor: pointer;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 750;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.opx-mini-button-secondary {
+  border: 1px solid rgba(47, 209, 124, 0.34);
+  background: rgba(15, 23, 42, 0.72);
+  color: #93e4bd;
+}
+
 .opx-view {
   display: block;
 }
@@ -447,6 +505,11 @@ export const PANEL_STYLES = `
   border-color: rgba(47, 209, 124, 0.7);
   background: rgba(47, 209, 124, 0.16);
   color: #dcfce7;
+}
+
+.opx-external-link-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
 }
 
 .opx-check-row {

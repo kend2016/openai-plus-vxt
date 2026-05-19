@@ -1,6 +1,11 @@
+import { checkLatestVersion } from '../version-check/github';
 import { loadAddressAutofillSettings, saveAddressAutofillSettings } from './state';
 
 const TG_GROUP_URL = 'https://t.me/fuck_open';
+
+export interface SettingsDialogOptions {
+  onVersionChecked?: () => Promise<void> | void;
+}
 
 export interface SettingsDialogHandle {
   element: HTMLElement;
@@ -8,7 +13,7 @@ export interface SettingsDialogHandle {
   update(): Promise<void>;
 }
 
-export function createSettingsDialog(): SettingsDialogHandle {
+export function createSettingsDialog(options: SettingsDialogOptions = {}): SettingsDialogHandle {
   const overlay = document.createElement('div');
   overlay.className = 'opx-settings-overlay';
   overlay.hidden = true;
@@ -50,6 +55,13 @@ export function createSettingsDialog(): SettingsDialogHandle {
     'PayPal 注册页自动填写',
     '用于 paypal.com/checkoutweb/signup 页面，填写国家、邮箱、卡资料、姓名、地址和密码提示。',
   );
+
+  const checkUpdateButton = document.createElement('button');
+  checkUpdateButton.className = 'opx-external-link-button';
+  checkUpdateButton.type = 'button';
+  checkUpdateButton.title = '立即检查 GitHub Release 最新版本';
+  checkUpdateButton.textContent = '检测更新';
+
   const tgGroupButton = document.createElement('button');
   tgGroupButton.className = 'opx-external-link-button';
   tgGroupButton.type = 'button';
@@ -63,7 +75,7 @@ export function createSettingsDialog(): SettingsDialogHandle {
   const status = document.createElement('div');
   status.className = 'opx-status';
 
-  dialog.append(header, payOpenAiItem, payPalSignupItem, tgGroupButton, hint, status);
+  dialog.append(header, payOpenAiItem, payPalSignupItem, checkUpdateButton, tgGroupButton, hint, status);
   overlay.append(dialog);
 
   closeButton.addEventListener('click', close);
@@ -83,6 +95,25 @@ export function createSettingsDialog(): SettingsDialogHandle {
   });
   tgGroupButton.addEventListener('click', () => {
     window.open(TG_GROUP_URL, '_blank', 'noopener,noreferrer');
+  });
+  checkUpdateButton.addEventListener('click', async () => {
+    checkUpdateButton.disabled = true;
+    setStatus(status, '正在检测 GitHub 最新版本...', 'pending');
+    try {
+      const result = await checkLatestVersion(true);
+      await options.onVersionChecked?.();
+      if (result.latest && result.updateAvailable) {
+        setStatus(status, `发现新版本 v${result.latest.version}，顶部已显示更新提示`, 'ok');
+      } else if (result.latest) {
+        setStatus(status, `当前已是最新版本 v${result.currentVersion}`, 'ok');
+      } else {
+        setStatus(status, result.error || '暂未找到可用 Release', 'pending');
+      }
+    } catch (error) {
+      setStatus(status, error instanceof Error ? error.message : String(error), 'error');
+    } finally {
+      checkUpdateButton.disabled = false;
+    }
   });
 
   const update = async () => {

@@ -4,6 +4,7 @@ import { createRegisterPanel } from '../features/register/panel';
 import type { RegisterController } from '../features/register/types';
 import { createSettingsDialog } from '../features/settings/panel';
 import { createSmsPanel } from '../features/sms/panel';
+import { createVersionNotice } from '../features/version-check/panel';
 import { isFeatureTab, loadAppState, saveActiveTab, savePanelCollapsed } from './state';
 import { PANEL_STYLES } from './styles';
 import type { FeaturePanelHandle, FeatureTab } from './types';
@@ -60,7 +61,10 @@ export function createPanel(root: ShadowRoot, registerController: RegisterContro
     address: createAddressPanel(addressView),
     sms: createSmsPanel(smsView),
   };
-  const settingsDialog = createSettingsDialog();
+  const versionNotice = createVersionNotice();
+  const settingsDialog = createSettingsDialog({
+    onVersionChecked: () => versionNotice.update(true),
+  });
 
   let activeTab: FeatureTab = 'register';
 
@@ -114,11 +118,12 @@ export function createPanel(root: ShadowRoot, registerController: RegisterContro
   });
 
   topbar.append(tabs, settingsButton);
-  panel.append(topbar, state, registerView, linkView, addressView, smsView, settingsDialog.element);
+  panel.append(topbar, versionNotice.element, state, registerView, linkView, addressView, smsView, settingsDialog.element);
   shell.append(collapseButton, panel);
   root.append(style, shell);
 
   window.setInterval(() => void updateState(), 1000);
+  window.setTimeout(() => void versionNotice.update(), 800);
   void updateState().then(() => {
     void handles[activeTab].onShow?.();
   });

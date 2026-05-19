@@ -13,6 +13,7 @@ export default defineConfig({
       'https://www.paypal.com/*',
       'https://paypal.com/*',
       'https://www.meiguodizhi.com/*',
+      'https://api.github.com/*',
       'https://mail-api.yuecheng.shop/*',
     ],
   },
